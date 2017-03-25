@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "153718601789",
+    "project_id": "portfolio-161617"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:153718601789:android:da293d55edfe96b6",
+        "android_client_info": {
+          "package_name": "com.android.jerroldelayre.portfolio.mapgeo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "153718601789-ituloldngn2ja0d6gpa2c3g19e56lu3n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.jerroldelayre.portfolio.mapgeo",
+            "certificate_hash": "0adad82edcba913d83af47a48edc4bb581f8a5b3"
+          }
+        },
+        {
+          "client_id": "153718601789-qe0kg3o4og784nehtg3eeeomrlvevla8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxh3S_CXOU7Cz-Cui0TYHJrDBTnkHmA34"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
