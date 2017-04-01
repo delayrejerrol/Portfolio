@@ -95,48 +95,20 @@ public class GoogleMapActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.google_map, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if(id == R.id.nav_map_normal_mode || id == R.id.nav_map_satellite_mode || id == R.id.nav_map_night_mode) {
+            loadGoogleMapStyle(mMap, id);
+        }
+        /*if (id == R.id.nav_camera) {
             mLocationApi.startIntentService("Malolos, Bulacan");
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
         }
+        */
 
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
@@ -145,7 +117,8 @@ public class GoogleMapActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        loadGoogleMapStyle(googleMap);
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+        loadGoogleMapStyle(googleMap, R.id.nav_map_normal_mode);
 
         mMap.setOnMarkerDragListener(this);
     }
@@ -200,12 +173,25 @@ public class GoogleMapActivity extends AppCompatActivity
 
     /**
      * Set the google map style as standard.
+     *
+     * @param googleMap The Google Map
+     * @param navId The selected navigation id
+     *
+     * @see <a href="https://mapstyle.withgoogle.com/">Styling Wizard</a>
      */
-    private void loadGoogleMapStyle(GoogleMap googleMap) {
+    private void loadGoogleMapStyle(GoogleMap googleMap, int navId) {
         try {
             // Customise the styling of the base map using a JSON object defined
             // in a raw resource file.
-            boolean success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.standard_map_no_landmarks));
+            boolean success = false;
+            if (navId == R.id.nav_map_normal_mode) {
+                success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.standard_map_no_landmarks));
+            } else if (navId == R.id.nav_map_night_mode) {
+                success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.night_map));
+            } else if (navId == R.id.nav_map_satellite_mode) {
+                success = true;
+                googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            }
             if(!success) {
                 Log.e("GoogleMapActivity", "Style parsing failed.");
             }
