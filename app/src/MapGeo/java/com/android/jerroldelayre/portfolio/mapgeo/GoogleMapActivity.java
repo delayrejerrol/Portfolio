@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -17,20 +18,33 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.jerroldelayre.portfolio.R;
 import com.android.jerroldelayre.portfolio.mapgeo.googleapis.LocationAPI;
 import com.android.jerroldelayre.portfolio.mapgeo.googleapis.SignInAPI;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.OnStreetViewPanoramaReadyCallback;
+import com.google.android.gms.maps.StreetViewPanorama;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.SupportStreetViewPanoramaFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.StreetViewPanoramaLocation;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,13 +52,17 @@ import butterknife.OnClick;
 
 public class GoogleMapActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnMarkerDragListener,
-        LocationAPI.LocationAPIListener {
+        LocationAPI.LocationAPIListener, StreetViewPanorama.OnStreetViewPanoramaChangeListener {
 
     private static final String TAG = "GoogleMapActivity";
 
     @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @BindView(R.id.nav_view) NavigationView mNavigationView;
+    SupportStreetViewPanoramaFragment mStreetViewPanoramaFragment;
+    StreetViewPanorama mStreetViewPanorama;
+
+    private SwitchCompat switchShowPanorama;
 
     private GoogleMap mMap;
     private LocationAPI mLocationApi;
@@ -53,6 +71,8 @@ public class GoogleMapActivity extends AppCompatActivity
     private String sDisplayName;
     private String sEmail;
     private Uri uriPhoto;
+
+    private static final int PLACE_PICKER_REQUEST = 0x2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,19 +90,23 @@ public class GoogleMapActivity extends AppCompatActivity
 
         //initialize google map
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        mStreetViewPanoramaFragment = (SupportStreetViewPanoramaFragment) getSupportFragmentManager().findFragmentById(R.id.streetviewpanorama);
+        mStreetViewPanoramaFragment.getStreetViewPanoramaAsync(streetViewPanorama -> {
+            mStreetViewPanorama = streetViewPanorama;
+            mStreetViewPanorama.setOnStreetViewPanoramaChangeListener(GoogleMapActivity.this);
+        });
 
         //initialize locationApi
         mLocationApi = new LocationAPI(this);
+        initNavigationHeader(mNavigationView);
 
         Bundle bundle = getIntent().getExtras();
         if(bundle != null) {
             sDisplayName = bundle.getString(SignInAPI.DISPLAY_NAME);
             sEmail = bundle.getString(SignInAPI.EMAIL);
             uriPhoto = bundle.getParcelable(SignInAPI.PHOTO);
-            initNavigationHeader(mNavigationView);
         }
     }
 
@@ -93,6 +117,27 @@ public class GoogleMapActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_google_map, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if(id == R.id.action_search) {
+            PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+            try {
+                startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
+            } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -168,6 +213,10 @@ public class GoogleMapActivity extends AppCompatActivity
         if(marker.equals(mMyLocationMarker)) {
             Log.i("GoogleMapActivity", "onMarkerDragEnd called");
             mLocationApi.startIntentServiceWithSelectedLocation(marker.getPosition().latitude, marker.getPosition().longitude);
+
+            if(!mStreetViewPanoramaFragment.isHidden()) {
+                mStreetViewPanorama.setPosition(marker.getPosition());
+            }
         }
     }
 
@@ -185,12 +234,14 @@ public class GoogleMapActivity extends AppCompatActivity
             // in a raw resource file.
             boolean success = false;
             if (navId == R.id.nav_map_normal_mode) {
+                googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.standard_map_no_landmarks));
             } else if (navId == R.id.nav_map_night_mode) {
+                googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.night_map));
             } else if (navId == R.id.nav_map_satellite_mode) {
-                success = true;
                 googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                success = true;
             }
             if(!success) {
                 Log.e("GoogleMapActivity", "Style parsing failed.");
@@ -223,6 +274,10 @@ public class GoogleMapActivity extends AppCompatActivity
 
         mLocationApi.startIntentService();
         mLocationApi.stopLocationUpdate();
+
+        if(!mStreetViewPanoramaFragment.isHidden()) {
+            mStreetViewPanorama.setPosition(latLng);
+        }
     }
 
     @Override
@@ -239,10 +294,21 @@ public class GoogleMapActivity extends AppCompatActivity
                         break;
                 }
                 break;
+            case PLACE_PICKER_REQUEST:
+                switch (resultCode) {
+                    case RESULT_OK:
+                        Place place = PlacePicker.getPlace(this, data);
+                        String toastMsg = String.format("Place: %s", place.getName());
+                        Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
+                        break;
+                }
+                break;
         }
     }
 
     private void initNavigationHeader(NavigationView navigationView) {
+        getSupportFragmentManager().beginTransaction().hide(mStreetViewPanoramaFragment).commit();
+
         View view = navigationView.getHeaderView(0);
         TextView mTextViewDisplayName = (TextView) view.findViewById(R.id.tv_display_name);
         TextView mTextViewEmail = (TextView) view.findViewById(R.id.tv_email);
@@ -255,5 +321,28 @@ public class GoogleMapActivity extends AppCompatActivity
                 .thumbnail(0.5f)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(mImageViewPhoto);
+
+        Menu menu = navigationView.getMenu();
+        MenuItem menuItem = menu.getItem(menu.size() - 1);
+        switchShowPanorama = (SwitchCompat) menu.findItem(R.id.nav_switch_panorama).getActionView();
+        switchShowPanorama.setOnCheckedChangeListener((buttonView, isChecked) ->  {
+            if(isChecked) {
+                getSupportFragmentManager().beginTransaction().show(mStreetViewPanoramaFragment).commit();
+            } else {
+                getSupportFragmentManager().beginTransaction().hide(mStreetViewPanoramaFragment).commit();
+            }
+        });
+    }
+
+    @Override
+    public void onStreetViewPanoramaChange(StreetViewPanoramaLocation streetViewPanoramaLocation) {
+        if (!mStreetViewPanoramaFragment.isHidden()) {
+            if (streetViewPanoramaLocation != null && streetViewPanoramaLocation.links != null) {
+                mMyLocationMarker.setPosition(streetViewPanoramaLocation.position);
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(streetViewPanoramaLocation.position));
+            } else {
+                Toast.makeText(this, "Panorama is only available on street.", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }

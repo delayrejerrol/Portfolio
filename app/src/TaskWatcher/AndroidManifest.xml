@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:fullBackupContent="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name="com.android.jerroldelayre.portfolio.taskwatcher.LoginActivity"
+            android:theme="@style/LoginTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.android.jerroldelayre.portfolio.taskwatcher.TaskActivity"
+            android:label="@string/title_activity_task"
+            android:theme="@style/AppTheme"></activity>
+        <activity
+            android:name="com.android.jerroldelayre.portfolio.taskwatcher.ProjectActivity"
+            android:label="@string/title_activity_project"
+            android:theme="@style/AppTheme"></activity>
+    </application>
+
+</manifest>
