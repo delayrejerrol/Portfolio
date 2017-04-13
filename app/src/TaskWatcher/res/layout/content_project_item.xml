@@ -3,16 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
     app:cardCornerRadius="4dp"
     app:cardElevation="8dp">
 
     <LinearLayout
+        android:id="@+id/layout_project_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
-        android:clickable="true"
         android:background="@drawable/drawable_cardview_background">
+
+        <Toolbar
+            android:id="@+id/card_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize" />
 
         <TextView
             android:id="@+id/tv_project_name"

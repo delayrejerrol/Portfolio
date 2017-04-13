@@ -37,13 +37,6 @@ android {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
-    sourceSets {
-        TaskMonitoring { java.srcDirs = ['src/TaskMonitoring/java', 'src/TaskMonitoring/java/'] }
-        TaskWatcher {
-            java.srcDirs = ['src/TaskWatcher/java', 'src/TaskWatcher/java/']
-            res.srcDirs = ['src/TaskWatcher/res', 'src/TaskWatcher/res/']
-        }
-    }
 }
 
 dependencies {
