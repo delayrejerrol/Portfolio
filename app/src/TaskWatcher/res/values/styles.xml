@@ -13,8 +13,9 @@
     </style>
 
     <style name="ButtonColored" parent="Widget.AppCompat.Button.Colored">
-        <item name="android:background">@color/primary_darker</item>
+        <item name="android:background">@drawable/drawable_button_background</item>
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:elevation">8dp</item>
     </style>
 
     <style name="TextInputLayout" parent="TextAppearance.AppCompat">

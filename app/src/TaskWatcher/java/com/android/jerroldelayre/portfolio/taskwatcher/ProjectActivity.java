@@ -2,6 +2,8 @@ package com.android.jerroldelayre.portfolio.taskwatcher;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,6 +32,7 @@ public class ProjectActivity extends AppCompatActivity {
 
     @BindView(R.id.rv_project_container) RecyclerView rvProjectContainer;
     @BindView(R.id.layout_empty_container) LinearLayout mLayoutEmptyContainer;
+    @BindView(R.id.app_bar) AppBarLayout mAppBarLayout;
     private ProjectAdapter projectAdapter;
     private Database db;
 
@@ -68,6 +71,8 @@ public class ProjectActivity extends AppCompatActivity {
                 if(cursor.getCount() > 0) {
                     rvProjectContainer.setVisibility(View.VISIBLE);
                     mLayoutEmptyContainer.setVisibility(View.GONE);
+                } else {
+                    mAppBarLayout.setExpanded(false);
                 }
                 projectAdapter.swapCursor(cursor);
             }
