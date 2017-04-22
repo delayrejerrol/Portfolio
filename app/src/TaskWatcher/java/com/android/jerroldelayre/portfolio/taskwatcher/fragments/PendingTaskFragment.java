@@ -40,12 +40,12 @@ public class PendingTaskFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnPendingTaskListener) {
+       /* if (context instanceof OnPendingTaskListener) {
             mListener = (OnPendingTaskListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnPendingTaskListener");
-        }
+        }*/
     }
 
     @Override

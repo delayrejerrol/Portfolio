@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'portfolio'
             keyPassword '123456'
-            storeFile file('C:/Users/Jerrol/Documents/GitHub/keystore/portfolio.jks')
+            storeFile file('C:/Users/Jerrol/Documents/GitHub/Portfolio/portfolio.jks')
             storePassword '123456'
         }
     }

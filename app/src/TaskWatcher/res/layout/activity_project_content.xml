@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingStart="16dp"
@@ -15,8 +16,26 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_project_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
         android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/container_add_project"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_create_new_project"
+            style="@style/ButtonColored"
+            android:text="Create new project..."
+            android:layout_width="match_parent"
+            android:layout_height="120dp" />
+
+        <include
+            layout="@layout/layout_new_project" />
+    </LinearLayout>
 
     <include
         layout="@layout/layout_empty_background" />
@@ -25,4 +44,4 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
         android:text="@string/large_text" /-->
-</FrameLayout>
+</LinearLayout>

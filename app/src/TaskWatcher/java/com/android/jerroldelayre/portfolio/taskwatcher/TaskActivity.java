@@ -1,84 +1,67 @@
 package com.android.jerroldelayre.portfolio.taskwatcher;
 
-import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.jerroldelayre.portfolio.R;
-import com.android.jerroldelayre.portfolio.taskwatcher.fragments.FinishTaskFragment;
-import com.android.jerroldelayre.portfolio.taskwatcher.fragments.OnWorkingTaskFragment;
-import com.android.jerroldelayre.portfolio.taskwatcher.fragments.PendingTaskFragment;
+import com.android.jerroldelayre.portfolio.adapter.RecyclerViewCursorAdapter;
+import com.android.jerroldelayre.portfolio.taskwatcher.databases.Database;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class TaskActivity extends AppCompatActivity {
 
     /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-
-    /**
      * The {@link ViewPager} that will host the section contents.
      */
-    private ViewPager mViewPager;
+    @BindView(R.id.container) RecyclerView rvTaskContainer;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.edittext_task_list_name) EditText mEditTextTaskListName;
 
-    /**
-     * Fragments...
-     */
-    PendingTaskFragment pendingTaskFragment;
-    OnWorkingTaskFragment onWorkingTaskFragment;
-    FinishTaskFragment finishTaskFragment;
+    String projectId;
+
+    TaskListAdapter taskListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setContentView(R.layout.activity_task);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        rvTaskContainer.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        Bundle bundle = getIntent().getExtras();
+        projectId = bundle.getString(Database._ID);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_create_new_project);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
+        Database database = new Database(this);
+        taskListAdapter = new TaskListAdapter(database.getTaskList());
+        rvTaskContainer.setAdapter(taskListAdapter);
+        database.close();
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_task, menu);
         return true;
     }
 
@@ -100,49 +83,49 @@ public class TaskActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    @OnClick(R.id.btn_save_task_list)
+    public void saveTaskList(View view) {
+        Database db = new Database(this);
+        if(db.insertTaskList(projectId, mEditTextTaskListName.getText().toString()) > 0 ) {
+            taskListAdapter.swapCursor(db.getTaskList());
+        }
+        db.close();
+    }
 
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
+    class TaskListAdapter extends RecyclerViewCursorAdapter<TaskListAdapter.ViewHolder> {
+
+        TaskListAdapter(Cursor cursor) {
+            super(cursor);
         }
 
         @Override
-        public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            switch (position) {
-                case 0:
-                    return PendingTaskFragment.newInstance();
-                case 1:
-                    return OnWorkingTaskFragment.newInstance();
-                case 2:
-                    return FinishTaskFragment.newInstance();
-                default:
-                    return null;
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_task_list, parent, false);
+
+            return new ViewHolder(view);
+        }
+
+        @Override
+        protected void onBindViewHolder(ViewHolder holder, Cursor cursor) {
+            //holder.mToolbar.setTitle(cursor.getString(cursor.getColumnIndex(Database.TBL_TASK_LIST.NAME)));
+        }
+
+        class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+            @BindView(R.id.tv_task_name) TextView mTextViewTaskName;
+            @BindView(R.id.iv_show_more)
+            ImageView mImageViewShowMore;
+
+            ViewHolder (View itemView) {
+                super(itemView);
+                ButterKnife.bind(this, itemView);
+                itemView.setOnClickListener(this);
             }
-        }
 
-        @Override
-        public int getCount() {
-            // Show 3 total pages.
-            return 3;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "PENDING TASK";
-                case 1:
-                    return "ON WORKING TASK";
-                case 2:
-                    return "FINISHED TASK";
+            @Override
+            public void onClick(View v) {
+                Log.i("TaskListAdapter", "onClick");
             }
-            return null;
         }
     }
 }

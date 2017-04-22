@@ -17,18 +17,24 @@ public class Database extends SQLiteOpenHelper implements BaseColumns {
     private static final int DATABASE_VERSION = 1;
 
     public interface TABLE {
-        String PROJECT = "PROJECT";
-        String TASKS = "TASKS";
+        String PROJECT = "TBL_PROJECT";
+        String TASKS_LIST = "TBL_TASKS_LIST";
+        String TASKS_ITEM = "TBL_TASKS_ITEM";
     }
 
     public interface TBL_PROJECT {
         String TITLE = "PROJECT_TITLE";
         String DESCRIPTION = "PROJECT_DESC";
     }
-    public interface TBL_TASKS {
+    public interface TBL_TASK_LIST {
         String PROJECT_ID = "PROJECT_ID";
-        String TITLE = "TASK_TITLE";
-        String DESCRIPTION = "TASK_DESC";
+        String NAME = "TASK_LIST_NAME";
+    }
+
+    public interface TBL_TASK_ITEM {
+        String TASK_ID = "TASK_ID";
+        String NAME = "TASK_ITEM_NAME";
+        String DESCRIPTION = "DESCRIPTION";
         String DUE_DATE = "TASK_DUE_DATE";
     }
 
@@ -44,19 +50,26 @@ public class Database extends SQLiteOpenHelper implements BaseColumns {
                 + TBL_PROJECT.DESCRIPTION + " TEXT)"
         );
 
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE.TASKS + "("
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE.TASKS_LIST + "("
                 + Database._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + TBL_TASKS.TITLE + " TEXT,"
-                + TBL_TASKS.DESCRIPTION + " TEXT,"
-                + TBL_TASKS.DUE_DATE + " TEXT,"
-                + TBL_TASKS.PROJECT_ID + " TEXT)"
+                + TBL_TASK_LIST.NAME + " TEXT,"
+                + TBL_TASK_LIST.PROJECT_ID + " TEXT)"
+        );
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE.TASKS_ITEM + "("
+                + Database._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + TBL_TASK_ITEM.TASK_ID + " TEXT,"
+                + TBL_TASK_ITEM.NAME + " TEXT,"
+                + TBL_TASK_ITEM.DESCRIPTION + " TEXT,"
+                + TBL_TASK_ITEM.DUE_DATE + " TEXT)"
         );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DELETE TABLE IF EXISTS " + TABLE.PROJECT);
-        db.execSQL("DELETE TABLE IF EXISTS " + TABLE.TASKS);
+        db.execSQL("DELETE TABLE IF EXISTS " + TABLE.TASKS_LIST);
+        db.execSQL("DELETE TABLE IF EXISTS " + TABLE.TASKS_ITEM);
     }
 
     private SQLiteDatabase dbWrite() { return this.getWritableDatabase(); }
@@ -70,18 +83,22 @@ public class Database extends SQLiteOpenHelper implements BaseColumns {
         return dbWrite().insert(TABLE.PROJECT, null, values);
     }
 
-    public long insertTask(String projectId, String title, String description, String due_date) {
+    public long insertTaskList(String projectId, String title) {
         ContentValues values = new ContentValues();
-        values.put(TBL_TASKS.PROJECT_ID, projectId);
-        values.put(TBL_TASKS.TITLE, title);
-        values.put(TBL_TASKS.DESCRIPTION, description);
-        values.put(TBL_TASKS.DUE_DATE, due_date);
+        values.put(TBL_TASK_LIST.PROJECT_ID, projectId);
+        values.put(TBL_TASK_LIST.NAME, title);
 
-        return dbWrite().insert(TABLE.TASKS, null, values);
+        return dbWrite().insert(TABLE.TASKS_LIST, null, values);
     }
 
     public Cursor getProjectList() {
         Cursor cursor = dbRead().query(TABLE.PROJECT, null, null, null, null, null, null);
+        cursor.moveToFirst();
+        return cursor;
+    }
+
+    public Cursor getTaskList() {
+        Cursor cursor = dbRead().query(TABLE.TASKS_LIST, null, null, null, null, null, null);
         cursor.moveToFirst();
         return cursor;
     }

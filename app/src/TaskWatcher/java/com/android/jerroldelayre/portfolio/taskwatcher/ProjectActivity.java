@@ -1,22 +1,25 @@
 package com.android.jerroldelayre.portfolio.taskwatcher;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,10 +34,19 @@ import butterknife.OnClick;
 public class ProjectActivity extends AppCompatActivity {
 
     @BindView(R.id.rv_project_container) RecyclerView rvProjectContainer;
-    @BindView(R.id.layout_empty_container) LinearLayout mLayoutEmptyContainer;
     @BindView(R.id.app_bar) AppBarLayout mAppBarLayout;
+    @BindView(R.id.layout_empty_container) LinearLayout mLayoutEmptyContainer;
+
+    @BindView(R.id.btn_create_new_project) Button mBtnCreateNewProject;
+
+    @BindView(R.id.container_new_project) LinearLayout mContainerNewProject;
+    @BindView(R.id.edittext_project_title) EditText mEditTextProjectTitle;
+    @BindView(R.id.edittext_project_description) EditText mEditTextProjectDescription;
+
     private ProjectAdapter projectAdapter;
     private Database db;
+
+    private boolean hasAppbarOffset = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,16 +62,22 @@ public class ProjectActivity extends AppCompatActivity {
         if(cursor.getCount() > 0) {
             rvProjectContainer.setVisibility(View.VISIBLE);
             mLayoutEmptyContainer.setVisibility(View.GONE);
+        } else {
+            mAppBarLayout.setExpanded(false);
+            hasAppbarOffset = true;
+            updateAppBarOffset();
         }
         projectAdapter = new ProjectAdapter(db.getProjectList());
         rvProjectContainer.setAdapter(projectAdapter);
         db.close();
     }
 
-    @OnClick(R.id.fab_create_new_project)
+    @OnClick (R.id.btn_create_new_project)
     public void createNewProject(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View mDialogView = getLayoutInflater().inflate(R.layout.dialog_new_project, null);
+        view.setVisibility(View.GONE);
+        mContainerNewProject.setVisibility(View.VISIBLE);
+        /*AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View mDialogView = getLayoutInflater().inflate(R.layout.layout_new_project, null);
         final EditText mEditTextProjectTitle = (EditText) mDialogView.findViewById(R.id.edittext_project_title);
         final EditText mEditTextProjectDescription = (EditText) mDialogView.findViewById(R.id.edittext_project_description);
         builder.setView(mDialogView)
@@ -71,8 +89,11 @@ public class ProjectActivity extends AppCompatActivity {
                 if(cursor.getCount() > 0) {
                     rvProjectContainer.setVisibility(View.VISIBLE);
                     mLayoutEmptyContainer.setVisibility(View.GONE);
-                } else {
-                    mAppBarLayout.setExpanded(false);
+                    if(hasAppbarOffset) {
+                        mAppBarLayout.removeOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
+                            appBarLayout.setExpanded(true);
+                        });
+                    }
                 }
                 projectAdapter.swapCursor(cursor);
             }
@@ -83,25 +104,68 @@ public class ProjectActivity extends AppCompatActivity {
             dialog.dismiss();
         });
         AlertDialog dialog = builder.create();
-        dialog.show();
+        dialog.show();*/
     }
 
-    public class ProjectAdapter extends RecyclerViewCursorAdapter<ProjectAdapter.ViewHolder> {
+    @OnClick(R.id.btn_save_new_project)
+    public void saveNewProject(View view) {
+        Database db = new Database(ProjectActivity.this);
+        if(db.insertProject(mEditTextProjectTitle.getText().toString(), mEditTextProjectDescription.getText().toString()) > 0) {
+            Toast.makeText(ProjectActivity.this, "New Project has been created", Toast.LENGTH_LONG).show();
+            Cursor cursor = db.getProjectList();
+            if(cursor.getCount() > 0) {
+                rvProjectContainer.setVisibility(View.VISIBLE);
+                mLayoutEmptyContainer.setVisibility(View.GONE);
+                if(hasAppbarOffset) {
+                    hasAppbarOffset = false;
+                    updateAppBarOffset();
+                }
+            }
+            projectAdapter.swapCursor(cursor);
+            mContainerNewProject.setVisibility(View.GONE);
+            mBtnCreateNewProject.setVisibility(View.VISIBLE);
+        }
+        db.close();
+    }
 
-        public ProjectAdapter(Cursor cursor) {
+    private void updateAppBarOffset() {
+        mAppBarLayout.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
+            if(hasAppbarOffset) {
+                if (verticalOffset != -198) {
+                    appBarLayout.setExpanded(false, false);
+                }
+            } else {
+                if(verticalOffset != 0) {
+                    appBarLayout.setExpanded(true);
+                }
+            }
+            Log.i("ProjectActivity", "VerticalOffset: " + verticalOffset);
+        });
+    }
+
+    @OnClick(R.id.btn_cancel_new_project)
+    public void cancelNewProject(View view) {
+        mEditTextProjectTitle.setText("");
+        mEditTextProjectDescription.setText("");
+        mContainerNewProject.setVisibility(View.GONE);
+        mBtnCreateNewProject.setVisibility(View.VISIBLE);
+    }
+
+    class ProjectAdapter extends RecyclerViewCursorAdapter<ProjectAdapter.ViewHolder> {
+
+        ProjectAdapter(Cursor cursor) {
             super(cursor);
         }
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.content_project_item, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_project_content_item, parent, false);
 
             return new ViewHolder(view);
         }
 
         @Override
         protected void onBindViewHolder(ViewHolder holder, Cursor cursor) {
-            holder.mCardToolbar.setTitle(cursor.getString(cursor.getColumnIndex(Database.TBL_PROJECT.TITLE)));
             holder.mProjectId = cursor.getString(cursor.getColumnIndex(Database._ID));
             holder.mTextViewProjectName.setText(cursor.getString(cursor.getColumnIndex(Database.TBL_PROJECT.TITLE)));
             holder.mTextViewProjectDescription.setText(cursor.getString(cursor.getColumnIndex(Database.TBL_PROJECT.DESCRIPTION)));
@@ -110,30 +174,37 @@ public class ProjectActivity extends AppCompatActivity {
         class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
             String mProjectId;
+            //@BindView(R.id.tv_project_name) TextView mTextViewProjectName;
             @BindView(R.id.tv_project_name) TextView mTextViewProjectName;
             @BindView(R.id.tv_project_description) TextView mTextViewProjectDescription;
-            @BindView(R.id.card_toolbar) Toolbar mCardToolbar;
+            @BindView(R.id.iv_show_more) ImageView mImageViewShowMore;
 
             ViewHolder (View itemView) {
                 super(itemView);
                 ButterKnife.bind(this, itemView);
                 itemView.setOnClickListener(this);
-
-                mCardToolbar.inflateMenu(R.menu.menu_main);
-                mCardToolbar.setOnMenuItemClickListener(item -> {
-                    int id = item.getItemId();
-
-                    if(id == R.id.action_settings) {
-                        Log.i("ProjectActivity", "menu clicked");
-                    }
-
-                    return true;
-                });
+                mImageViewShowMore.setOnClickListener(this);
             }
 
             @Override
             public void onClick(View v) {
-                Log.i("ProjectActivity", "onClick");
+
+                if(v == mImageViewShowMore) {
+                    ContextThemeWrapper ctw = new ContextThemeWrapper(getBaseContext(), R.style.CustomPopupTheme);
+                    PopupMenu popupMenu = new PopupMenu(ctw, v);
+                    MenuInflater menuInflater = popupMenu.getMenuInflater();
+                    menuInflater.inflate(R.menu.menu_project, popupMenu.getMenu());
+                    popupMenu.setOnMenuItemClickListener(item -> false);
+                    popupMenu.show();
+                } else {
+                    Log.i("ProjectActivity", "onClick");
+                    Intent intent = new Intent(getApplicationContext(), TaskActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(Database._ID, mProjectId);
+                    intent.putExtras(bundle);
+                    getApplicationContext().startActivity(intent);
+                }
             }
         }
     }
