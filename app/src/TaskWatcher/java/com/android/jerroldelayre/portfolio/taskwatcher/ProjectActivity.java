@@ -46,8 +46,6 @@ public class ProjectActivity extends AppCompatActivity {
     private ProjectAdapter projectAdapter;
     private Database db;
 
-    private boolean hasAppbarOffset = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,8 +62,6 @@ public class ProjectActivity extends AppCompatActivity {
             mLayoutEmptyContainer.setVisibility(View.GONE);
         } else {
             mAppBarLayout.setExpanded(false);
-            hasAppbarOffset = true;
-            updateAppBarOffset();
         }
         projectAdapter = new ProjectAdapter(db.getProjectList());
         rvProjectContainer.setAdapter(projectAdapter);
@@ -116,31 +112,13 @@ public class ProjectActivity extends AppCompatActivity {
             if(cursor.getCount() > 0) {
                 rvProjectContainer.setVisibility(View.VISIBLE);
                 mLayoutEmptyContainer.setVisibility(View.GONE);
-                if(hasAppbarOffset) {
-                    hasAppbarOffset = false;
-                    updateAppBarOffset();
-                }
+                mAppBarLayout.setExpanded(true);
             }
             projectAdapter.swapCursor(cursor);
             mContainerNewProject.setVisibility(View.GONE);
             mBtnCreateNewProject.setVisibility(View.VISIBLE);
         }
         db.close();
-    }
-
-    private void updateAppBarOffset() {
-        mAppBarLayout.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
-            if(hasAppbarOffset) {
-                if (verticalOffset != -198) {
-                    appBarLayout.setExpanded(false, false);
-                }
-            } else {
-                if(verticalOffset != 0) {
-                    appBarLayout.setExpanded(true);
-                }
-            }
-            Log.i("ProjectActivity", "VerticalOffset: " + verticalOffset);
-        });
     }
 
     @OnClick(R.id.btn_cancel_new_project)

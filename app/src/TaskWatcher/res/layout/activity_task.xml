@@ -45,6 +45,7 @@
                     <EditText
                         android:hint="Add a list..."
                         android:id="@+id/edittext_task_list_name"
+                        android:inputType="text"
                         android:textColor="@color/primary_text"
                         android:textColorHint="@color/divider"
                         android:background="@android:color/transparent"

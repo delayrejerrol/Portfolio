@@ -91,14 +91,28 @@ public class Database extends SQLiteOpenHelper implements BaseColumns {
         return dbWrite().insert(TABLE.TASKS_LIST, null, values);
     }
 
+    public long insertTaskListItem(String taskId, String name) {
+        ContentValues values = new ContentValues();
+        values.put(TBL_TASK_ITEM.TASK_ID, taskId);
+        values.put(TBL_TASK_ITEM.NAME, name);
+
+        return dbWrite().insert(TABLE.TASKS_ITEM, null, values);
+    }
+
     public Cursor getProjectList() {
         Cursor cursor = dbRead().query(TABLE.PROJECT, null, null, null, null, null, null);
         cursor.moveToFirst();
         return cursor;
     }
 
-    public Cursor getTaskList() {
-        Cursor cursor = dbRead().query(TABLE.TASKS_LIST, null, null, null, null, null, null);
+    public Cursor getTaskList(String projectId) {
+        Cursor cursor = dbRead().query(TABLE.TASKS_LIST, null, TBL_TASK_LIST.PROJECT_ID + " = ?", new String[] {projectId}, null, null, null);
+        cursor.moveToFirst();
+        return cursor;
+    }
+
+    public Cursor getTaskListItem(String taskId) {
+        Cursor cursor = dbRead().query(TABLE.TASKS_ITEM, null, TBL_TASK_ITEM.TASK_ID + " = ?", new String[] {taskId}, null, null, null);
         cursor.moveToFirst();
         return cursor;
     }

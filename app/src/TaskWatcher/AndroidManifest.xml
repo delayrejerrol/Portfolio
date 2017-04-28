@@ -15,12 +15,11 @@
         </activity>
         <activity
             android:name="com.android.jerroldelayre.portfolio.taskwatcher.TaskActivity"
-            android:label="@string/title_activity_task"
-            android:theme="@style/AppTheme"></activity>
+            android:label="@string/title_activity_task" />
         <activity
             android:name="com.android.jerroldelayre.portfolio.taskwatcher.ProjectActivity"
             android:label="@string/title_activity_project"
-            android:theme="@style/AppTheme"></activity>
+            android:windowSoftInputMode="adjustPan|adjustUnspecified"/>
     </application>
 
 </manifest>
