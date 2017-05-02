@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -35,6 +36,7 @@ public class ProjectActivity extends AppCompatActivity {
 
     @BindView(R.id.rv_project_container) RecyclerView rvProjectContainer;
     @BindView(R.id.app_bar) AppBarLayout mAppBarLayout;
+    @BindView(R.id.nsv_container) NestedScrollView mNestedScrollViewContainer;
     @BindView(R.id.layout_empty_container) LinearLayout mLayoutEmptyContainer;
 
     @BindView(R.id.btn_create_new_project) Button mBtnCreateNewProject;
@@ -72,6 +74,7 @@ public class ProjectActivity extends AppCompatActivity {
     public void createNewProject(View view) {
         view.setVisibility(View.GONE);
         mContainerNewProject.setVisibility(View.VISIBLE);
+        mNestedScrollViewContainer.scrollTo(0, mNestedScrollViewContainer.getNestedScrollAxes());
         /*AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View mDialogView = getLayoutInflater().inflate(R.layout.layout_new_project, null);
         final EditText mEditTextProjectTitle = (EditText) mDialogView.findViewById(R.id.edittext_project_title);
@@ -113,8 +116,11 @@ public class ProjectActivity extends AppCompatActivity {
                 rvProjectContainer.setVisibility(View.VISIBLE);
                 mLayoutEmptyContainer.setVisibility(View.GONE);
                 mAppBarLayout.setExpanded(true);
+                mEditTextProjectTitle.setText("");
+                mEditTextProjectDescription.setText("");
             }
             projectAdapter.swapCursor(cursor);
+            //projectAdapter.notifyItemInserted(cursor.getCount() - 1);
             mContainerNewProject.setVisibility(View.GONE);
             mBtnCreateNewProject.setVisibility(View.VISIBLE);
         }
@@ -172,7 +178,13 @@ public class ProjectActivity extends AppCompatActivity {
                     PopupMenu popupMenu = new PopupMenu(ctw, v);
                     MenuInflater menuInflater = popupMenu.getMenuInflater();
                     menuInflater.inflate(R.menu.menu_project, popupMenu.getMenu());
-                    popupMenu.setOnMenuItemClickListener(item -> false);
+                    popupMenu.setOnMenuItemClickListener(item -> {
+                        int id = item.getItemId();
+                        if(id == R.id.action_delete) {
+
+                        }
+                        return false;
+                    });
                     popupMenu.show();
                 } else {
                     Log.i("ProjectActivity", "onClick");

@@ -30,6 +30,8 @@ public class LoginActivity extends AppCompatActivity {
     public void onLogin(View view) {
         if(mEditTextUsername.getText().toString().equals("admin") && mEditTextPassword.getText().toString().equals("admin")) {
             //TODO: Login
+            mEditTextUsername.setText("");
+            mEditTextPassword.setText("");
             startActivity(new Intent(this, ProjectActivity.class));
         }
     }
