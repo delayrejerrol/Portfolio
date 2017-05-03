@@ -42,7 +42,7 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="CustomPopupTheme" parent="ThemeOverlay.AppCompat.Dark">
+    <style name="CustomPopupTheme" parent="@android:style/ThemeOverlay.Material.Dark">
         <item name="android:popupMenuStyle">@style/PopupMenu</item>
     </style>
 
