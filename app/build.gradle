@@ -18,10 +18,10 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
         jackOptions {
             enabled true
         }
+        signingConfig signingConfigs.config
     }
     buildTypes {
         release {
@@ -37,16 +37,17 @@ android {
         MapGeo {
             applicationIdSuffix ".mapgeo"
             versionNameSuffix "-MapGeo"
+            signingConfig signingConfigs.config
         }
-
         TaskWatcher {
             applicationIdSuffix ".taskwatcher"
             versionNameSuffix "-TaskWatcher"
+            signingConfig signingConfigs.config
         }
-
         SMSObserver {
             applicationIdSuffix ".smsobserver"
             versionNameSuffix "-SmsObserver"
+            signingConfig signingConfigs.config
         }
     }
     compileOptions {

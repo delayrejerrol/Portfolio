@@ -1,7 +1,5 @@
 package com.android.jerroldelayre.portfolio.smsobserver;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,10 +24,11 @@ public class SMSReceiver extends BroadcastReceiver {
         } catch (Exception e) {
             Log.e(TAG, "onReceiver method cannot be processed");
         }*/
-        //Intent i = new Intent(context, SMSSendService.class);
+        Log.i(TAG, "" + intent.getAction());
+        Intent i = new Intent(context, SMSService.class);
         //i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         //i.addCategory(Intent.CATEGORY_LAUNCHER);
         //context.startActivity(i);
-        //context.startService(i);
+        context.startService(i);
     }
 }
