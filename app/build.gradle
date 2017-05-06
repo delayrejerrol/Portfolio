@@ -49,12 +49,25 @@ android {
             versionNameSuffix "-SmsObserver"
             signingConfig signingConfigs.config
         }
+        BluetoothDisabler {
+            applicationIdSuffix ".bluetoothdisabler"
+            versionNameSuffix "-BluetoothDisabler"
+            signingConfig signingConfigs.config
+        }
+        ExcelReadWrite {
+            applicationIdSuffix ".excelreadwrite"
+            versionNameSuffix "-ExcelReadWrite"
+            signingConfig signingConfigs.config
+        }
     }
     compileOptions {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
-    sourceSets { SMSObserver { res.srcDirs = ['src/SMSObserver/res', 'src/SMSObserver/res/'] } }
+    sourceSets {
+        SMSObserver { res.srcDirs = ['src/SMSObserver/res', 'src/SMSObserver/res/'] }
+        ExcelReadWrite { res.srcDirs = ['src/ExcelReadWrite/res', 'src/ExcelReadWrite/res/'] }
+    }
 }
 
 dependencies {
@@ -76,4 +89,12 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    compile 'com.android.support:multidex:1.0.1'
+    //compile 'org.apache.poi:poi:3.16'
+    //compile 'org.apache.poi:poi-ooxml:3.16'
+    //compile 'org.apache.poi:poi-ooxml-schemas:3.16'
+    //compile 'com.github.virtuald:curvesapi:1.05'
+    //compile 'org.apache.xmlbeans:xmlbeans:2.6.0'
+    compile files('poi-3.12-android-a.jar')
+    compile files('poi-ooxml-schemas-3.12-20150511-a.jar')
 }

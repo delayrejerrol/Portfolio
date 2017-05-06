@@ -13,9 +13,8 @@
             android:name="com.android.jerroldelayre.portfolio.smsobserver.SMSService" />
 
         <activity android:name="com.android.jerroldelayre.portfolio.smsobserver.MainActivity"
-            android:launchMode="singleTask"
-            android:theme="@style/Theme.Transparent"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|uiMode">
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Transparent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

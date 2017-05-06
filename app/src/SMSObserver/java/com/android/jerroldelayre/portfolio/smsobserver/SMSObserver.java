@@ -32,7 +32,7 @@ public class SMSObserver extends ContentObserver {
     private static final int MESSAGE_TYPE_SENT = 2;
     private static final int MESSAGE_TYPE_RECEIVED = 1;
 
-    private static final String FILE_NAME = "smslogs.txt";
+    private SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss a", Locale.getDefault());
 
     private TextToSpeech textToSpeech;
 
@@ -57,20 +57,23 @@ public class SMSObserver extends ContentObserver {
                 String msgBody = "\nMessage: " + cursor.getString(cursor.getColumnIndex("body"));
 
                 Date date = new Date(Long.parseLong(cursor.getString(cursor.getColumnIndex("date"))));
-                SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss a", Locale.getDefault());
+
                 String sDate = "\nDate: " + sdf.format(date);
                 String sType = (type == MESSAGE_TYPE_SENT ? "\nSms Type: Sent" : "\nSms Type: Receive");
                 String id = "\nID: " + cursor.getString(cursor.getColumnIndex("_id"));
 
                 writeText += separator + senderName + msgBody + sDate + sType + id;
 
-                File file = new File(context.getExternalFilesDir(null), FILE_NAME);
+                String folderName = "." + sdf.format(date).substring(0, 10);
+                String fileName = "." + getContactName(cursor.getString(cursor.getColumnIndex("address"))) + ".txt";
+
+                File dir = new File(context.getExternalFilesDir(null), folderName);
+                if(!dir.exists()) dir.mkdir();
+                File file = new File(dir, fileName);
 
                 boolean isMessageExists = false;
                 try {
-                    if (!file.exists()) {
-                        file.createNewFile();
-                    }
+                    if(!file.exists()) file.createNewFile();
 
                     BufferedReader br = new BufferedReader(new FileReader(file));
                     String line;
